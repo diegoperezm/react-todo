@@ -1,6 +1,10 @@
-
 This project was bootstrapped with [[https://github.com/facebook/create-react-app][Create React App]].
 
+
+** APP DIAGRAM 
+
+
+[[file:./public/react-todo-app-diagram.png]]
 
 ** STATE TRANSITION TABLE 
 
