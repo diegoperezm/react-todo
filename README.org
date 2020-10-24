@@ -1,0 +1,247 @@
+
+This project was bootstrapped with [[https://github.com/facebook/create-react-app][Create React App]].
+
+
+** STATE TRANSITION TABLE 
+
+| state    | input   | next state |
+|----------+---------+------------|
+| idle     | CREATE  | creating   |
+| idle     | FETCH   | loading    |
+| idle     | UPDATE  | updating   |
+| idle     | DELETE  | deleting   |
+|----------+---------+------------|
+| creating | FETCH   | loading    |
+|----------+---------+------------|
+| updating | FETCH   | loading    |
+|----------+---------+------------|
+| deleting | FETCH   | loading    |
+| deleting | REJECT  | failure    |
+|----------+---------+------------|
+| loading  | REJECT  | failure    |
+| loading  | RESOLVE | idle       |
+|----------+---------+------------|
+| failure  | FETCH   | idle       |
+|----------+---------+------------|
+
+*** STATE DESCRIPTION
+
+#+BEGIN_SRC  js
+const NEXTSTATE = {
+    state: {
+      event: {
+         status: next-state,
+         id: id,
+         error: error,
+         data: data
+      }
+    }
+}
+#+END_SRC
+
+
+
+*** STATE OBJECT
+
+#+BEGIN_SRC js
+const NEXTSTATE = {
+      idle: {
+          FETCH:  {
+              ...state,
+              status:  'loading',
+          }, 
+          CREATE: { 
+              ...state,
+               status:  'creating'
+          },
+          UPDATE: {
+              ...state,
+              status:  'updating',
+              id: event.id
+          },
+          DELETE: {
+              ...state,
+              status:  'deleting',
+              id: event.id
+          }
+      },
+      creating: {
+          FETCH:  {
+              ...state,
+              status:  'loading'
+          }, 
+      },
+      updating: {
+          FETCH:  {
+              ...state,
+              status:  'loading',
+          }, 
+      },
+      deleting: {
+          FETCH:  {
+              ...state,
+              status:  'loading'  
+          }, 
+          REJECT:  {
+              ...state,
+              status: 'failure',
+              error: event.error
+          }
+      },
+      loading: {
+          RESOLVE: {
+              ...state,
+              status: 'idle',
+              data: event.data
+          },
+          REJECT:  {
+              ...state,
+              status: 'failure',
+              error: event.error
+          }
+      },
+      failure: {
+          FETCH:   {
+              ...state,
+              status: 'idle',
+  //         error: event.error
+          }
+      }
+};
+#+END_SRC
+
+
+
+
+
+
+
+
+** GETTING THE  NEXT STATE
+   
+#+BEGIN_SRC js
+ const nextState = NEXTSTATE[state.status][event.type];
+ return nextState !== undefined ? nextState : state;
+#+END_SRC
+
+
+** ACTIONS AND DISPATCH
+  
+| state    | action   |
+|----------+----------|
+| creating | create() |
+|----------+----------|
+| loading  | read()   |
+|----------+----------|
+| updating | update() |
+|----------+----------|
+| deleting | remove() |
+|----------+----------|
+
+The actions(create, read, update and remove) are async functions that are called inside =useEffect= and they also dispatch the events.   
+
+The only dependency in the dependency array is =state.status= and this generate a warning:
+
+#+BEGIN_QUOTE
+React Hook useEffect has missing dependencies: 'query' and 'state.id'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+#+END_QUOTE
+
+This is because React wants to avoid update inconsistencies. React is watching for 'data' changes (query, state.id) but I want to focus in =state= changes (at the moment I'm ignoring this warning because I can't identify a problem in the app with the current approach).
+ 
+ 
+
+#+BEGIN_SRC js 
+   // CREATE   
+   if(state.status === 'creating' ) {
+     create();
+   }
+
+   // READ
+   if(state.status === 'loading') {
+     read();
+   }
+
+      
+   // UPDATE 
+   if(state.status === 'updating' ) {
+      update();
+   }
+
+   // DELETE
+   if(state.status === 'deleting' ) {
+      remove();
+   }
+
+  }, [state.status]);
+#+END_SRC
+
+
+*** Functions
+
+- Create
+
+#+BEGIN_SRC js
+async  function create() {
+       try {
+           await axios.post('http://localhost:5000/todo', {data: query});
+           await setQuery('');
+           await dispatch({type: 'FETCH'});
+       } catch(error) {
+           await dispatch({type: 'FETCH'});
+       }
+    }
+#+END_SRC
+
+- Read
+
+#+BEGIN_SRC js
+async  function read() {
+       try {
+         const res  = await axios.get('http://localhost:5000/todo');
+         const data = await res.data.data;
+         await dispatch({type: 'RESOLVE',  data});
+       } catch(error) {
+          await dispatch({type: 'REJECT',  error});
+       }
+    }
+#+END_SRC
+
+- Update
+
+#+BEGIN_SRC js
+async  function update() {
+      try {
+        await   axios.put('http://localhost:5000/todo', {id: state.id});
+        await dispatch({type: 'FETCH'});
+      } catch(error) {
+        await dispatch({type: 'REJECT',  error});
+      }
+   }
+#+END_SRC
+
+- Remove (Delete)
+
+#+BEGIN_SRC js
+async  function remove() {
+      try {
+          await axios({
+              method: 'DELETE',
+               url: 'http://localhost:5000/todo',  
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json'
+                },
+              data: {
+                  id: state.id
+              }
+             });
+         await dispatch({type: 'FETCH'});
+      } catch(error) {
+         await dispatch({type: 'REJECT',  error});
+      } 
+  }
+#+END_SRC
+
+
+
+   
