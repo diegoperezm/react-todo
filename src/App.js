@@ -16,7 +16,7 @@ import Button                                   from 'react-bootstrap/Button';
 
 function App() {
 
-  const   initialState        = {status: "loading", data: [], error: null, id: null};
+  const   initialState        = {status: "LOADING", data: [], error: null, id: null};
   const [ state, dispatch ]       = useReducer(todoReducer, initialState);
   let   [ query, setQuery ]   = useState('');
 
@@ -26,9 +26,9 @@ function App() {
        try {
            await axios.post('http://localhost:5000/todo', {data: query});
            await setQuery('');
-           await dispatch({type: 'FETCH'});
+           await dispatch({type: 'fetch'});
        } catch(error) {
-           await dispatch({type: 'FETCH'});
+           await dispatch({type: 'fetch'});
        }
     }
 
@@ -36,18 +36,18 @@ function App() {
        try {
          const res  = await axios.get('http://localhost:5000/todo');
          const data = await res.data.data;
-         await dispatch({type: 'RESOLVE',  data});
+         await dispatch({type: 'resolve',  data});
        } catch(error) {
-          await dispatch({type: 'REJECT',  error});
+          await dispatch({type: 'reject',  error});
        }
     }
 
    async  function update() {
       try {
         await   axios.put('http://localhost:5000/todo', {id: state.id});
-        await dispatch({type: 'FETCH'});
+        await dispatch({type: 'fetch'});
       } catch(error) {
-        await dispatch({type: 'REJECT',  error});
+        await dispatch({type: 'reject',  error});
       }
    }
 
@@ -64,30 +64,30 @@ function App() {
                   id: state.id
               }
              });
-         await dispatch({type: 'FETCH'});
+         await dispatch({type: 'fetch'});
       } catch(error) {
-         await dispatch({type: 'REJECT',  error});
+         await dispatch({type: 'reject',  error});
       } 
   }
 
    // CREATE   
-   if(state.status === 'creating' ) {
+   if(state.status === 'CREATING' ) {
      create();
    }
 
    // READ
-   if(state.status === 'loading') {
+   if(state.status === 'LOADING') {
      read();
    }
 
       
    // UPDATE 
-   if(state.status === 'updating' ) {
+   if(state.status === 'UPDATING' ) {
       update();
    }
 
    // DELETE
-   if(state.status === 'deleting' ) {
+   if(state.status === 'DELETING' ) {
       remove();
    }
 
@@ -95,7 +95,7 @@ function App() {
    
   const handleSubmit = evt => {
      evt.preventDefault();
-     dispatch({type:"CREATE", query});
+     dispatch({type:"create", query});
   };
 
      return (

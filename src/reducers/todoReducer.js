@@ -1,64 +1,64 @@
 function todoReducer(state, event) {
   const NEXTSTATE = {
-      idle: {
-          FETCH:  {
+      IDLE: {
+          fetch:  {
               ...state,
-              status:  'loading',
+              status:  'LOADING',
           }, 
-          CREATE: { 
+          create: { 
               ...state,
-               status:  'creating'
+               status:  'CREATING'
           },
-          UPDATE: {
+          update: {
               ...state,
-              status:  'updating',
+              status:  'UPDATING',
               id: event.id
           },
-          DELETE: {
+          delete: {
               ...state,
-              status:  'deleting',
+              status:  'DELETING',
               id: event.id
           }
       },
-      creating: {
-          FETCH:  {
+      CREATING: {
+          fetch:  {
               ...state,
-              status:  'loading'
+              status:  'LOADING'
           }, 
       },
-      updating: {
-          FETCH:  {
+      UPDATING: {
+          fetch:  {
               ...state,
-              status:  'loading',
+              status:  'LOADING',
           }, 
       },
-      deleting: {
-          FETCH:  {
+      DELETING: {
+          fetch:  {
               ...state,
-              status:  'loading'  
+              status:  'LOADING'  
           }, 
-          REJECT:  {
+          reject:  {
               ...state,
-              status: 'failure',
+              status: 'FAILURE',
               error: event.error
           }
       },
-      loading: {
-          RESOLVE: {
+      LOADING: {
+          resolve: {
               ...state,
-              status: 'idle',
+              status: 'IDLE',
               data: event.data
           },
-          REJECT:  {
+          reject:  {
               ...state,
-              status: 'failure',
+              status: 'FAILURE',
               error: event.error
           }
       },
-      failure: {
-          FETCH:   {
+      FAILURE: {
+          fetch:   {
               ...state,
-              status: 'idle',
+              status: 'IDLE',
   //         error: event.error
           }
       }
