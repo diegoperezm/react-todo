@@ -6,31 +6,31 @@ This project was bootstrapped with [[https://github.com/facebook/create-react-ap
 
 | state    | input   | next state |
 |----------+---------+------------|
-| idle     | CREATE  | creating   |
-| idle     | FETCH   | loading    |
-| idle     | UPDATE  | updating   |
-| idle     | DELETE  | deleting   |
+| IDLE     | create  | CREATING   |
+| IDLE     | fetch   | LOADING    |
+| IDLE     | update  | UPDATING   |
+| IDLE     | delete  | DELETING   |
 |----------+---------+------------|
-| creating | FETCH   | loading    |
+| CREATING | fetch   | LOADING    |
 |----------+---------+------------|
-| updating | FETCH   | loading    |
+| UPDATING | fetch   | LOADING    |
 |----------+---------+------------|
-| deleting | FETCH   | loading    |
-| deleting | REJECT  | failure    |
+| DELETING | fetch   | LOADING    |
+| DELETING | reject  | FAILURE    |
 |----------+---------+------------|
-| loading  | REJECT  | failure    |
-| loading  | RESOLVE | idle       |
+| LOADING  | reject  | FAILURE    |
+| LOADING  | resolve | IDLE       |
 |----------+---------+------------|
-| failure  | FETCH   | idle       |
+| FAILURE  | fetch   | IDLE       |
 |----------+---------+------------|
 
 *** STATE DESCRIPTION
 
 #+BEGIN_SRC  js
 const NEXTSTATE = {
-    state: {
+    STATE: {
       event: {
-         status: next-state,
+         status: NEXTSTATE,
          id: id,
          error: error,
          data: data
@@ -45,75 +45,70 @@ const NEXTSTATE = {
 
 #+BEGIN_SRC js
 const NEXTSTATE = {
-      idle: {
-          FETCH:  {
+      IDLE: {
+          fetch:  {
               ...state,
-              status:  'loading',
+              status:  'LOADING',
           }, 
-          CREATE: { 
+          create: { 
               ...state,
-               status:  'creating'
+               status:  'CREATING'
           },
-          UPDATE: {
+          update: {
               ...state,
-              status:  'updating',
+              status:  'UPDATING',
               id: event.id
           },
-          DELETE: {
+          delete: {
               ...state,
-              status:  'deleting',
+              status:  'DELETING',
               id: event.id
           }
       },
-      creating: {
-          FETCH:  {
+      CREATING: {
+          fetch:  {
               ...state,
-              status:  'loading'
+              status:  'LOADING'
           }, 
       },
-      updating: {
-          FETCH:  {
+      UPDATING: {
+          fetch:  {
               ...state,
-              status:  'loading',
+              status:  'LOADING',
           }, 
       },
-      deleting: {
-          FETCH:  {
+      DELETING: {
+          fetch:  {
               ...state,
-              status:  'loading'  
+              status:  'LOADING'  
           }, 
-          REJECT:  {
+          reject:  {
               ...state,
-              status: 'failure',
+              status: 'FAILURE',
               error: event.error
           }
       },
-      loading: {
-          RESOLVE: {
+      LOADING: {
+          resolve: {
               ...state,
-              status: 'idle',
+              status: 'IDLE',
               data: event.data
           },
-          REJECT:  {
+          reject:  {
               ...state,
-              status: 'failure',
+              status: 'FAILURE',
               error: event.error
           }
       },
-      failure: {
-          FETCH:   {
+      FAILURE: {
+          fetch:   {
               ...state,
-              status: 'idle',
+              status: 'IDLE',
   //         error: event.error
           }
       }
-};
+}
 #+END_SRC
-
-
-
-
-
 
 
 
@@ -129,13 +124,13 @@ const NEXTSTATE = {
   
 | state    | action   |
 |----------+----------|
-| creating | create() |
+| CREATING | create() |
 |----------+----------|
-| loading  | read()   |
+| LOADING  | read()   |
 |----------+----------|
-| updating | update() |
+| UPDATING | update() |
 |----------+----------|
-| deleting | remove() |
+| DELETING | remove() |
 |----------+----------|
 
 The actions(create, read, update and remove) are async functions that are called inside =useEffect= and they also dispatch the events.   
@@ -152,23 +147,23 @@ This is because React wants to avoid update inconsistencies. React is watching f
 
 #+BEGIN_SRC js 
    // CREATE   
-   if(state.status === 'creating' ) {
+   if(state.status === 'CREATING' ) {
      create();
    }
 
    // READ
-   if(state.status === 'loading') {
+   if(state.status === 'LOADING') {
      read();
    }
 
       
    // UPDATE 
-   if(state.status === 'updating' ) {
+   if(state.status === 'UPDATING' ) {
       update();
    }
 
    // DELETE
-   if(state.status === 'deleting' ) {
+   if(state.status === 'DELETING' ) {
       remove();
    }
 
@@ -185,9 +180,9 @@ async  function create() {
        try {
            await axios.post('http://localhost:5000/todo', {data: query});
            await setQuery('');
-           await dispatch({type: 'FETCH'});
+           await dispatch({type: 'fetch'});
        } catch(error) {
-           await dispatch({type: 'FETCH'});
+           await dispatch({type: 'fetch'});
        }
     }
 #+END_SRC
@@ -199,9 +194,9 @@ async  function read() {
        try {
          const res  = await axios.get('http://localhost:5000/todo');
          const data = await res.data.data;
-         await dispatch({type: 'RESOLVE',  data});
+         await dispatch({type: 'resolve',  data});
        } catch(error) {
-          await dispatch({type: 'REJECT',  error});
+          await dispatch({type: 'reject',  error});
        }
     }
 #+END_SRC
@@ -212,9 +207,9 @@ async  function read() {
 async  function update() {
       try {
         await   axios.put('http://localhost:5000/todo', {id: state.id});
-        await dispatch({type: 'FETCH'});
+        await dispatch({type: 'fetch'});
       } catch(error) {
-        await dispatch({type: 'REJECT',  error});
+        await dispatch({type: 'reject',  error});
       }
    }
 #+END_SRC
@@ -235,9 +230,9 @@ async  function remove() {
                   id: state.id
               }
              });
-         await dispatch({type: 'FETCH'});
+         await dispatch({type: 'fetch'});
       } catch(error) {
-         await dispatch({type: 'REJECT',  error});
+         await dispatch({type: 'reject',  error});
       } 
   }
 #+END_SRC
