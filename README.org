@@ -18,8 +18,8 @@ This project was bootstrapped with [[https://github.com/facebook/create-react-ap
 | deleting | FETCH   | loading    |
 | deleting | REJECT  | failure    |
 |----------+---------+------------|
-| Loading  | REJECT  | failure    |
-| Loading  | RESOLVE | idle       |
+| loading  | REJECT  | failure    |
+| loading  | RESOLVE | idle       |
 |----------+---------+------------|
 | failure  | FETCH   | idle       |
 |----------+---------+------------|
@@ -131,7 +131,7 @@ const NEXTSTATE = {
 |----------+----------|
 | creating | create() |
 |----------+----------|
-| Loading  | read()   |
+| loading  | read()   |
 |----------+----------|
 | updating | update() |
 |----------+----------|
