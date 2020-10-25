@@ -16,7 +16,15 @@ import Button                                   from 'react-bootstrap/Button';
 
 function App() {
 
-  const   initialState        = {status: "LOADING", data: [], error: null, id: null};
+  const   initialState        = {
+                                     status: "LOADING",
+                                     data: [],
+                                     error: null,
+                                     id: null,
+                                     noEntQuery: null,
+                                     isCompleted: false,
+  };
+
   const [ state, dispatch ]       = useReducer(todoReducer, initialState);
   let   [ query, setQuery ]   = useState('');
 
@@ -24,7 +32,7 @@ function App() {
 
    async  function create() {
        try {
-           await axios.post('http://localhost:5000/todo', {data: query});
+           await axios.post('http://localhost:5000/todo', {data: query, isCompleted: state.isCompleted});
            await setQuery('');
            await dispatch({type: 'fetch'});
        } catch(error) {
