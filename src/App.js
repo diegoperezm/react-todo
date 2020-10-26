@@ -32,7 +32,13 @@ function App() {
 
    async  function create() {
        try {
-           await axios.post('http://localhost:5000/todo', {data: query, isCompleted: state.isCompleted});
+           await axios
+                     .post(
+                         'http://localhost:5000/todo',
+                         {
+                             data: query,
+                             isCompleted: false 
+                         });
            await setQuery('');
            await dispatch({type: 'fetch'});
        } catch(error) {
