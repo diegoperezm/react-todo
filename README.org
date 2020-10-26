@@ -160,7 +160,7 @@ const NEXTSTATE = {
 | DELETING      | remove()      |
 |---------------+---------------|
 
-The actions(create, read, update and remove) are async functions that are called inside =useEffect= and they also dispatch the events.   
+The actions(create, noEntCreate, read, update and remove) are async functions that are called inside =useEffect= and they also dispatch the events.   
 
 The only dependency in the dependency array is =state.status= and this generate a warning:
 
