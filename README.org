@@ -6,27 +6,30 @@ This project was bootstrapped with [[https://github.com/facebook/create-react-ap
 
 [[file:./public/react-todo-app-diagram.png]]
 
+
 ** STATE TRANSITION TABLE 
 
-| state    | input   | next state |
-|----------+---------+------------|
-| IDLE     | create  | CREATING   |
-| IDLE     | fetch   | LOADING    |
-| IDLE     | update  | UPDATING   |
-| IDLE     | delete  | DELETING   |
-|----------+---------+------------|
-| CREATING | fetch   | LOADING    |
-|----------+---------+------------|
-| UPDATING | fetch   | LOADING    |
-|----------+---------+------------|
-| DELETING | fetch   | LOADING    |
-| DELETING | reject  | FAILURE    |
-|----------+---------+------------|
-| LOADING  | reject  | FAILURE    |
-| LOADING  | resolve | IDLE       |
-|----------+---------+------------|
-| FAILURE  | fetch   | IDLE       |
-|----------+---------+------------|
+| state         | input   | next state    |
+|---------------+---------+---------------|
+| IDLE          | create  | CREATING      |
+| IDLE          | fetch   | LOADING       |
+| IDLE          | update  | UPDATING      |
+| IDLE          | delete  | DELETING      |
+|---------------+---------+---------------|
+| CREATING      | fetch   | LOADING       |
+| NOENTCREATING | fetch   | LOADING       |
+|---------------+---------+---------------|
+| UPDATING      | fetch   | LOADING       |
+| UPDATING      | noent   | NOENTCREATING |
+|---------------+---------+---------------|
+| DELETING      | fetch   | LOADING       |
+| DELETING      | reject  | FAILURE       |
+|---------------+---------+---------------|
+| LOADING       | reject  | FAILURE       |
+| LOADING       | resolve | IDLE          |
+|---------------+---------+---------------|
+| FAILURE       | fetch   | IDLE          |
+|---------------+---------+---------------|
 
 *** STATE DESCRIPTION
 
@@ -69,18 +72,35 @@ const NEXTSTATE = {
               id: event.id
           }
       },
+
       CREATING: {
-          fetch:  {
-              ...state,
-              status:  'LOADING'
-          }, 
-      },
-      UPDATING: {
           fetch:  {
               ...state,
               status:  'LOADING',
           }, 
       },
+
+      NOENTCREATING: {
+          fetch:  {
+              ...state,
+              status:  'LOADING'
+          }, 
+      },
+ 
+      UPDATING: {
+          fetch:  {
+              ...state,
+              status:  'LOADING',
+          }, 
+          noent:  {
+              ...state,
+              status:     'NOENTCREATING',
+              noEntQuery:  event.noEntQuery,
+              isCompleted: event.isCompleted
+
+          }
+      },
+
       DELETING: {
           fetch:  {
               ...state,
@@ -92,6 +112,7 @@ const NEXTSTATE = {
               error: event.error
           }
       },
+
       LOADING: {
           resolve: {
               ...state,
@@ -104,6 +125,7 @@ const NEXTSTATE = {
               error: event.error
           }
       },
+
       FAILURE: {
           fetch:   {
               ...state,
@@ -111,7 +133,7 @@ const NEXTSTATE = {
   //         error: event.error
           }
       }
-}
+};
 #+END_SRC
 
 
@@ -126,16 +148,17 @@ const NEXTSTATE = {
 
 ** ACTIONS AND DISPATCH
   
-| state    | action   |
-|----------+----------|
-| CREATING | create() |
-|----------+----------|
-| LOADING  | read()   |
-|----------+----------|
-| UPDATING | update() |
-|----------+----------|
-| DELETING | remove() |
-|----------+----------|
+| state         | action        |
+|---------------+---------------|
+| CREATING      | create()      |
+| NOENTCREATING | noEntCreate() |
+|---------------+---------------|
+| LOADING       | read()        |
+|---------------+---------------|
+| UPDATING      | update()      |
+|---------------+---------------|
+| DELETING      | remove()      |
+|---------------+---------------|
 
 The actions(create, read, update and remove) are async functions that are called inside =useEffect= and they also dispatch the events.   
 
@@ -155,12 +178,15 @@ This is because React wants to avoid update inconsistencies. React is watching f
      create();
    }
 
+   if(state.status === 'NOENTCREATING' ) {
+     noEntCreate();
+   }
+
    // READ
    if(state.status === 'LOADING') {
      read();
    }
 
-      
    // UPDATE 
    if(state.status === 'UPDATING' ) {
       update();
@@ -181,14 +207,36 @@ This is because React wants to avoid update inconsistencies. React is watching f
 
 #+BEGIN_SRC js
 async  function create() {
-       try {
-           await axios.post('http://localhost:5000/todo', {data: query});
-           await setQuery('');
-           await dispatch({type: 'fetch'});
-       } catch(error) {
-           await dispatch({type: 'fetch'});
-       }
+    try {
+        await axios
+                  .post(
+                      'http://localhost:5000/todo',
+                      {
+                          data: query,
+                          isCompleted: false 
+                      });
+        await setQuery('');
+        await dispatch({type: 'fetch'});
+    } catch(error) {
+        await dispatch({type: 'fetch'});
     }
+ }
+
+async  function noEntCreate() {
+    try {
+        await axios
+                  .post(
+                      'http://localhost:5000/todo',
+                      {
+                          data: state.noEntQuery,
+                          isCompleted: state.isCompleted
+                      }
+                  );
+        await dispatch({type: 'fetch'});
+    } catch(error) {
+        await dispatch({type: 'fetch'});
+    }
+ }
 #+END_SRC
 
 - Read
@@ -209,13 +257,20 @@ async  function read() {
 
 #+BEGIN_SRC js
 async  function update() {
-      try {
-        await   axios.put('http://localhost:5000/todo', {id: state.id});
-        await dispatch({type: 'fetch'});
-      } catch(error) {
-        await dispatch({type: 'reject',  error});
-      }
+   try {
+     await axios.put('http://localhost:5000/todo', {id: state.id});
+     await dispatch({type: 'fetch'});
+   } catch(error) {
+       if(error.message === 'Request failed with status code 409') {
+         let noEntTodo   = await state.data.filter( todo => todo._id === state.id);  
+         let noEntQuery  = await noEntTodo[0].data;
+         let isCompleted = await !noEntTodo[0].isCompleted;
+         await dispatch({type: 'noent', noEntQuery, isCompleted });
+       } else { 
+         await dispatch({type: 'reject',  error});
+       }
    }
+}
 #+END_SRC
 
 - Remove (Delete)
