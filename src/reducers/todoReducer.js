@@ -20,18 +20,35 @@ function todoReducer(state, event) {
               id: event.id
           }
       },
+
       CREATING: {
-          fetch:  {
-              ...state,
-              status:  'LOADING'
-          }, 
-      },
-      UPDATING: {
           fetch:  {
               ...state,
               status:  'LOADING',
           }, 
       },
+
+      NOENTCREATING: {
+          fetch:  {
+              ...state,
+              status:  'LOADING'
+          }, 
+      },
+ 
+      UPDATING: {
+          fetch:  {
+              ...state,
+              status:  'LOADING',
+          }, 
+          noent:  {
+              ...state,
+              status:     'NOENTCREATING',
+              noEntQuery:  event.noEntQuery,
+              isCompleted: event.isCompleted
+
+          }
+      },
+
       DELETING: {
           fetch:  {
               ...state,
@@ -43,6 +60,7 @@ function todoReducer(state, event) {
               error: event.error
           }
       },
+
       LOADING: {
           resolve: {
               ...state,
@@ -55,6 +73,7 @@ function todoReducer(state, event) {
               error: event.error
           }
       },
+
       FAILURE: {
           fetch:   {
               ...state,

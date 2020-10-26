@@ -29,7 +29,7 @@ function App() {
   let   [ query, setQuery ]   = useState('');
 
   useEffect(() => {
-
+      
    async  function create() {
        try {
            await axios
@@ -40,6 +40,22 @@ function App() {
                              isCompleted: false 
                          });
            await setQuery('');
+           await dispatch({type: 'fetch'});
+       } catch(error) {
+           await dispatch({type: 'fetch'});
+       }
+    }
+
+   async  function noEntCreate() {
+       try {
+           await axios
+                     .post(
+                         'http://localhost:5000/todo',
+                         {
+                             data: state.noEntQuery,
+                             isCompleted: state.isCompleted
+                         }
+                     );
            await dispatch({type: 'fetch'});
        } catch(error) {
            await dispatch({type: 'fetch'});
@@ -58,10 +74,17 @@ function App() {
 
    async  function update() {
       try {
-        await   axios.put('http://localhost:5000/todo', {id: state.id});
+        await axios.put('http://localhost:5000/todo', {id: state.id});
         await dispatch({type: 'fetch'});
       } catch(error) {
-        await dispatch({type: 'reject',  error});
+          if(error.message === 'Request failed with status code 409') {
+            let noEntTodo   = await state.data.filter( todo => todo._id === state.id);  
+            let noEntQuery  = await noEntTodo[0].data;
+            let isCompleted = await !noEntTodo[0].isCompleted;
+            await dispatch({type: 'noent', noEntQuery, isCompleted });
+          } else { 
+            await dispatch({type: 'reject',  error});
+          }
       }
    }
 
@@ -89,6 +112,10 @@ function App() {
      create();
    }
 
+   if(state.status === 'NOENTCREATING' ) {
+     noEntCreate();
+   }
+      
    // READ
    if(state.status === 'LOADING') {
      read();
