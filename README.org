@@ -38,9 +38,7 @@ const NEXTSTATE = {
     STATE: {
       event: {
          status: NEXTSTATE,
-         id: id,
-         error: error,
-         data: data
+         // ...
       }
     }
 }
