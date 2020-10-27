@@ -80,6 +80,11 @@ const NEXTSTATE = {
               ...state,
               status:  'LOADING',
           }, 
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
+          }
       },
 
       NOENTCREATING: {
@@ -87,6 +92,12 @@ const NEXTSTATE = {
               ...state,
               status:  'LOADING'
           }, 
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
+          }
+ 
       },
  
       UPDATING: {
@@ -99,8 +110,13 @@ const NEXTSTATE = {
               status:     'NOENTCREATING',
               noEntQuery:  event.noEntQuery,
               isCompleted: event.isCompleted
+          },
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
           }
-      },
+     },
 
       DELETING: {
           fetch:  {
@@ -132,7 +148,6 @@ const NEXTSTATE = {
       FAILURE: {}
 };
 #+END_SRC
-
 
 ** GETTING THE  NEXT STATE
    

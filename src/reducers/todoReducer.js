@@ -30,6 +30,11 @@ function todoReducer(state, event) {
               ...state,
               status:  'LOADING',
           }, 
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
+          }
       },
 
       NOENTCREATING: {
@@ -37,6 +42,12 @@ function todoReducer(state, event) {
               ...state,
               status:  'LOADING'
           }, 
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
+          }
+ 
       },
  
       UPDATING: {
@@ -49,8 +60,13 @@ function todoReducer(state, event) {
               status:     'NOENTCREATING',
               noEntQuery:  event.noEntQuery,
               isCompleted: event.isCompleted
+          },
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
           }
-      },
+     },
 
       DELETING: {
           fetch:  {
