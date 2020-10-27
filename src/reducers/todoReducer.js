@@ -79,13 +79,7 @@ function todoReducer(state, event) {
           }
       },
 
-      FAILURE: {
-          fetch:   {
-              ...state,
-              status: 'IDLE',
-  //         error: event.error
-          }
-      }
+      FAILURE: {}
 };
 
     const nextState = NEXTSTATE[state.status][event.type];

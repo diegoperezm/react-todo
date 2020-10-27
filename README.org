@@ -129,13 +129,7 @@ const NEXTSTATE = {
           }
       },
 
-      FAILURE: {
-          fetch:   {
-              ...state,
-              status: 'IDLE',
-  //         error: event.error
-          }
-      }
+      FAILURE: {}
 };
 #+END_SRC
 
