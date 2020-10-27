@@ -54,20 +54,24 @@ const NEXTSTATE = {
           fetch:  {
               ...state,
               status:  'LOADING',
+              isInputDisabled: true 
           }, 
           create: { 
               ...state,
-               status:  'CREATING'
+              status:  'CREATING',
+              isInputDisabled: true 
           },
           update: {
               ...state,
               status:  'UPDATING',
-              id: event.id
+              id: event.id,
+              isInputDisabled: true 
           },
           delete: {
               ...state,
               status:  'DELETING',
-              id: event.id
+              id: event.id,
+              isInputDisabled: true 
           }
       },
 
@@ -95,7 +99,6 @@ const NEXTSTATE = {
               status:     'NOENTCREATING',
               noEntQuery:  event.noEntQuery,
               isCompleted: event.isCompleted
-
           }
       },
 
@@ -115,12 +118,14 @@ const NEXTSTATE = {
           resolve: {
               ...state,
               status: 'IDLE',
-              data: event.data
+              data: event.data,
+              isInputDisabled: false
           },
           reject:  {
               ...state,
               status: 'FAILURE',
               error: event.error
+
           }
       },
 
@@ -133,7 +138,6 @@ const NEXTSTATE = {
       }
 };
 #+END_SRC
-
 
 
 ** GETTING THE  NEXT STATE

@@ -4,20 +4,24 @@ function todoReducer(state, event) {
           fetch:  {
               ...state,
               status:  'LOADING',
+              isInputDisabled: true 
           }, 
           create: { 
               ...state,
-               status:  'CREATING'
+              status:  'CREATING',
+              isInputDisabled: true 
           },
           update: {
               ...state,
               status:  'UPDATING',
-              id: event.id
+              id: event.id,
+              isInputDisabled: true 
           },
           delete: {
               ...state,
               status:  'DELETING',
-              id: event.id
+              id: event.id,
+              isInputDisabled: true 
           }
       },
 
@@ -45,7 +49,6 @@ function todoReducer(state, event) {
               status:     'NOENTCREATING',
               noEntQuery:  event.noEntQuery,
               isCompleted: event.isCompleted
-
           }
       },
 
@@ -65,12 +68,14 @@ function todoReducer(state, event) {
           resolve: {
               ...state,
               status: 'IDLE',
-              data: event.data
+              data: event.data,
+              isInputDisabled: false
           },
           reject:  {
               ...state,
               status: 'FAILURE',
               error: event.error
+
           }
       },
 

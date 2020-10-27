@@ -23,6 +23,7 @@ function App() {
                                      id: null,
                                      noEntQuery: null,
                                      isCompleted: false,
+                                     isInputDisabled: true 
   };
 
   const [ state, dispatch ]       = useReducer(todoReducer, initialState);
@@ -149,11 +150,13 @@ function App() {
            onSubmit={handleSubmit}
            >
          <Form.Control
+           disabled={state.isInputDisabled}
            type="text"
            required
            placeholder="What needs to be done?"
            onChange={evt => setQuery(evt.target.value)}
            value={query}
+
          />
          <Button
           className="mt-2 float-right"
