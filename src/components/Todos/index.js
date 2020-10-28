@@ -12,6 +12,7 @@ import List                                     from  '../List/';
 
 import axios                                    from 'axios';
 
+let PORT  = process.env.REACT_APP_MY_ENV;
 
 function Todos() {
   const   initialState        = {
@@ -41,7 +42,7 @@ function Todos() {
            await setQuery('');
            await dispatch({type: 'fetch'});
        } catch(error) {
-           await dispatch({type: 'fetch'});
+           await dispatch({type: 'reject', error});
        }
     }
 
@@ -57,13 +58,13 @@ function Todos() {
                      );
            await dispatch({type: 'fetch'});
        } catch(error) {
-           await dispatch({type: 'fetch'});
+           await dispatch({type: 'reject', error});
        }
     }
 
     async  function read() {
        try {
-         const res  = await axios.get('http://localhost:5000/todo');
+         const res  = await axios.get(PORT);
          const data = await res.data.data;
          await dispatch({type: 'resolve',  data});
        } catch(error) {
