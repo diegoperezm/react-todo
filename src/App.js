@@ -1,18 +1,24 @@
 import   React                                  from 'react';
-import   Todos                                  from './components/Todos';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+} from "react-router-dom";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Container                                from 'react-bootstrap/Container';
-import Row                                      from 'react-bootstrap/Row';
+
+import Todos                                    from './components/Todos';
 
 function App() {
     return(
-  <Container>
-    <Row >
-        <Todos/>
-   </Row>
+ <Container>
+     <Router>
+       <Switch>
+            <Route exact path="/todo"  component={Todos} />
+       </Switch>
+     </Router>       
  </Container>  
-
     );
 
 }

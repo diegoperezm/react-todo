@@ -3,6 +3,8 @@ import { useState, useEffect, useReducer}       from 'react';
 import   todoReducer                            from '../../reducers/todoReducer.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+
+import Row                                      from 'react-bootstrap/Row';
 import Col                                      from 'react-bootstrap/Col';
 import Form                                     from 'react-bootstrap/Form';
 import Table                                    from 'react-bootstrap/Table';
@@ -140,7 +142,7 @@ function Todos() {
   };
 
      return (
-<>
+   <Row >
       <Col xs={12} className="mt-5">
           <h1 >To do app, current state: {state.status}</h1>
           <Form
@@ -171,7 +173,7 @@ function Todos() {
           </tbody>
         </Table>
     </Col>
- </>
+   </Row>
     );
 
 };
