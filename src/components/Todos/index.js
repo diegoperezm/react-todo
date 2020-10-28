@@ -14,8 +14,6 @@ import List                                     from  '../List/';
 
 import axios                                    from 'axios';
 
-let PORT  = process.env.REACT_APP_MY_ENV;
-
 function Todos() {
   const   initialState        = {
                                      status: "LOADING",
@@ -66,7 +64,7 @@ function Todos() {
 
     async  function read() {
        try {
-         const res  = await axios.get(PORT);
+         const res  = await axios.get('http://localhost:5000/todo');
          const data = await res.data.data;
          await dispatch({type: 'resolve',  data});
        } catch(error) {
