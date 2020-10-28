@@ -17,10 +17,14 @@ This project was bootstrapped with [[https://github.com/facebook/create-react-ap
 | IDLE          | delete  | DELETING      |
 |---------------+---------+---------------|
 | CREATING      | fetch   | LOADING       |
+| CREATING      | reject  | FAILURE       |
+|---------------+---------+---------------|
 | NOENTCREATING | fetch   | LOADING       |
+| NOENTCREATING | reject  | FAILURE       |
 |---------------+---------+---------------|
 | UPDATING      | fetch   | LOADING       |
 | UPDATING      | noent   | NOENTCREATING |
+| UPDATING      | reject  | FAILURE       |
 |---------------+---------+---------------|
 | DELETING      | fetch   | LOADING       |
 | DELETING      | reject  | FAILURE       |
@@ -28,7 +32,7 @@ This project was bootstrapped with [[https://github.com/facebook/create-react-ap
 | LOADING       | reject  | FAILURE       |
 | LOADING       | resolve | IDLE          |
 |---------------+---------+---------------|
-| FAILURE       | fetch   | IDLE          |
+| FAILURE       |         |               |
 |---------------+---------+---------------|
 
 *** STATE DESCRIPTION
@@ -149,6 +153,7 @@ const NEXTSTATE = {
 };
 #+END_SRC
 
+
 ** GETTING THE  NEXT STATE
    
 #+BEGIN_SRC js
@@ -229,7 +234,7 @@ async  function create() {
         await setQuery('');
         await dispatch({type: 'fetch'});
     } catch(error) {
-        await dispatch({type: 'fetch'});
+        await dispatch({type: 'reject',  error});
     }
  }
 
@@ -245,7 +250,7 @@ async  function noEntCreate() {
                   );
         await dispatch({type: 'fetch'});
     } catch(error) {
-        await dispatch({type: 'fetch'});
+        await dispatch({type: 'reject',  error});
     }
  }
 #+END_SRC
