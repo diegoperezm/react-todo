@@ -11,27 +11,27 @@ import {
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Container                                 from 'react-bootstrap/Container';
 
-import   Todos                                   from './components/Todos';
-import   SignInPage                              from './components/SignIn';
-import   app                                     from 'firebase/app';
+import   Todos                                   from '../Todos';
+import   SignInPage                              from '../SignIn';
+import   SignOutBar                              from '../SignOut';
+import { withFirebase }                          from '../Firebase'; 
 
 
-
-function  App() {
+function  App(props) {
 
    const [ user, setUser ] = useState('loading'); 
-    useEffect(() => {
-      app.auth().onAuthStateChanged(function(userData) {
-          if(userData) {
+
+   useEffect(() => {
+      const unsubscribe = props.firebase.checkAuthStateChanged( userData =>  {
               setUser(true);
-          } else {
-              setUser(false);
-          }
-      });
-    }, [user]);
+       },
+       () => setUser(false));
+  
+
+       return () =>  unsubscribe();
+    });
     
 /* https://dev.to/mychal/protected-routes-with-react-function-components-dh */
-
    const ProtectedTodos = ({ component: Component, ...rest }) => {
      return (
         <Route
@@ -74,6 +74,7 @@ function  App() {
     return(
  <Container>
      <Router>
+       <SignOutBar /> 
        <Switch>
           <ProtectedSignin exact path='/signin' user={user} component={SignInPage} />
           <ProtectedTodos  exact path='/'       user={user} component={Todos} />
@@ -83,5 +84,5 @@ function  App() {
     );
 }
 
-export default App;
+export default withFirebase(App);
 

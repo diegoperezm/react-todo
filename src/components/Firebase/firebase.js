@@ -16,9 +16,20 @@ class Firebase {
         this.auth = app.auth();
     }
 
-  doSignInAnonymously   = () => this.auth.signInAnonymously()
-    checkAuthStateChanged = () => this.auth.onAuthStateChanged();
+   doSignInWithEmailAndPassword = (email, password) =>
+     this.auth.signInWithEmailAndPassword(email, password);
 
+    checkAuthStateChanged = ( next, fb) => {
+        return this.auth.onAuthStateChanged( user => {
+            if (user) {
+               next(user);
+            } else {
+                fb(); 
+            }
+        });
+    } 
+    
+   doSignOut = () => this.auth.signOut();
 }
 
 export default Firebase;
