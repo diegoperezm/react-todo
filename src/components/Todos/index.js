@@ -11,7 +11,7 @@ import Button                                   from 'react-bootstrap/Button';
 import List                                     from  '../List/';
 
 import axios                                    from 'axios';
-const  API                                      = process.env.REACT_APP_API; 
+const  SERVERURL                                = process.env.REACT_APP_SERVER_URL; 
 
 
 
@@ -35,7 +35,7 @@ function Todos() {
        try {
            await axios
                      .post(
-                         API, 
+                         SERVERURL, 
                          {
                              data: query,
                              isCompleted: false 
@@ -51,7 +51,7 @@ function Todos() {
        try {
            await axios
                      .post(
-                          API, 
+                          SERVERURL, 
                          {
                              data: state.noEntQuery,
                              isCompleted: state.isCompleted
@@ -65,7 +65,7 @@ function Todos() {
 
     async  function read() {
        try {
-         const res  = await axios.get(API);
+         const res  = await axios.get(SERVERURL);
          const data = await res.data.data;
          await dispatch({type: 'resolve',  data});
        } catch(error) {
@@ -75,7 +75,7 @@ function Todos() {
 
    async  function update() {
       try {
-        await axios.put(API, {id: state.id});
+        await axios.put(SERVERURL, {id: state.id});
         await dispatch({type: 'fetch'});
       } catch(error) {
           if(error.message === 'Request failed with status code 409') {
@@ -93,7 +93,7 @@ function Todos() {
       try {
           await axios({
               method: 'DELETE',
-               url: API,  
+               url: SERVERURL,  
                 headers: {
                   Accept: 'application/json',
                   'Content-Type': 'application/json'
