@@ -226,7 +226,7 @@ async  function create() {
     try {
         await axios
                   .post(
-                      'http://localhost:5000/todo',
+                      SERVERURL,
                       {
                           data: query,
                           isCompleted: false 
@@ -242,7 +242,7 @@ async  function noEntCreate() {
     try {
         await axios
                   .post(
-                      'http://localhost:5000/todo',
+                      SERVERURL,
                       {
                           data: state.noEntQuery,
                           isCompleted: state.isCompleted
@@ -260,7 +260,7 @@ async  function noEntCreate() {
 #+BEGIN_SRC js
 async  function read() {
        try {
-         const res  = await axios.get('http://localhost:5000/todo');
+         const res  = await axios.get(SERVERURL);
          const data = await res.data.data;
          await dispatch({type: 'resolve',  data});
        } catch(error) {
@@ -274,7 +274,7 @@ async  function read() {
 #+BEGIN_SRC js
 async  function update() {
    try {
-     await axios.put('http://localhost:5000/todo', {id: state.id});
+     await axios.put(SERVERURL, {id: state.id});
      await dispatch({type: 'fetch'});
    } catch(error) {
        if(error.message === 'Request failed with status code 409') {
@@ -296,7 +296,7 @@ async  function remove() {
       try {
           await axios({
               method: 'DELETE',
-               url: 'http://localhost:5000/todo',  
+               url: SERVERURL,  
                 headers: {
                   Accept: 'application/json',
                   'Content-Type': 'application/json'
