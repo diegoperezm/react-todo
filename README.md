@@ -1,68 +1,316 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+## APP DIAGRAM
 
-In the project directory, you can run:
+![diagram](./public/react-todo-app-diagram.png)
 
-### `npm start`
+## STATE TRANSITION TABLE 
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+| state         | input   | next state    |
+|-----------------------------------------|
+| IDLE          | create  | CREATING      |
+| IDLE          | fetch   | LOADING       |
+| IDLE          | update  | UPDATING      |
+| IDLE          | delete  | DELETING      |
+| CREATING      | fetch   | LOADING       |
+| CREATING      | reject  | FAILURE       |
+| NOENTCREATING | fetch   | LOADING       |
+| NOENTCREATING | reject  | FAILURE       |
+| UPDATING      | fetch   | LOADING       |
+| UPDATING      | noent   | NOENTCREATING |
+| UPDATING      | reject  | FAILURE       |
+| DELETING      | fetch   | LOADING       |
+| DELETING      | reject  | FAILURE       |
+| LOADING       | reject  | FAILURE       |
+| LOADING       | resolve | IDLE          |
+| FAILURE       |         |               |
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
 
-### `npm test`
+###  STATE DESCRIPTION
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+``` javascript
+const NEXTSTATE = {
+    STATE: {
+      event: {
+         status: NEXTSTATE,
+         // ...
+      }
+    }
+}
+```
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### STATE OBJECT
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+``` javascript
+const NEXTSTATE = {
+      IDLE: {
+          fetch:  {
+              ...state,
+              status:  'LOADING',
+              isInputDisabled: true 
+          }, 
+          create: { 
+              ...state,
+              status:  'CREATING',
+              isInputDisabled: true 
+          },
+          update: {
+              ...state,
+              status:  'UPDATING',
+              id: event.id,
+              isInputDisabled: true 
+          },
+          delete: {
+              ...state,
+              status:  'DELETING',
+              id: event.id,
+              isInputDisabled: true 
+          }
+      },
 
-### `npm run eject`
+      CREATING: {
+          fetch:  {
+              ...state,
+              status:  'LOADING',
+          }, 
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
+          }
+      },
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+      NOENTCREATING: {
+          fetch:  {
+              ...state,
+              status:  'LOADING'
+          }, 
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
+          }
+ 
+      },
+ 
+      UPDATING: {
+          fetch:  {
+              ...state,
+              status:  'LOADING',
+          }, 
+          noent:  {
+              ...state,
+              status:     'NOENTCREATING',
+              noEntQuery:  event.noEntQuery,
+              isCompleted: event.isCompleted
+          },
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
+          }
+     },
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+      DELETING: {
+          fetch:  {
+              ...state,
+              status:  'LOADING'  
+          }, 
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
+          }
+      },
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+      LOADING: {
+          resolve: {
+              ...state,
+              status: 'IDLE',
+              data: event.data,
+              isInputDisabled: false
+          },
+          reject:  {
+              ...state,
+              status: 'FAILURE',
+              error: event.error
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+          }
+      },
 
-## Learn More
+      FAILURE: {}
+};
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## GETTING THE  NEXT STATE
+   
 
-### Code Splitting
+``` javascript
+ const nextState = NEXTSTATE[state.status][event.type];
+ return nextState !== undefined ? nextState : state;
+```
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+## ACTIONS AND DISPATCH
+  
+| state         | action        |
+|-------------------------------|
+| CREATING      | create()      |
+| NOENTCREATING | noEntCreate() |
+| LOADING       | read()        |
+| UPDATING      | update()      |
+| DELETING      | remove()      |
 
-### Analyzing the Bundle Size
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+The actions(create, noEntCreate, read, update and remove) are async functions that are called inside =useEffect= and they also dispatch the events. 
 
-### Making a Progressive Web App
+The only dependency in the dependency array is =state.status= and this generate a warning:
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
 
-### Advanced Configuration
+> React Hook useEffect has missing dependencies: 'query' and 'state.id'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
 
-### Deployment
+This is because React wants to avoid update inconsistencies. React is watching for 'data' changes (query, state.id) but I want to focus in =state= changes (at the moment I'm ignoring this warning because I can't identify a problem in the app with the current approach).
+ 
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+``` javascript
+   // CREATE   
+   if(state.status === 'CREATING' ) {
+     create();
+   }
 
-### `npm run build` fails to minify
+   if(state.status === 'NOENTCREATING' ) {
+     noEntCreate();
+   }
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+   // READ
+   if(state.status === 'LOADING') {
+     read();
+   }
+
+   // UPDATE 
+   if(state.status === 'UPDATING' ) {
+      update();
+   }
+
+   // DELETE
+   if(state.status === 'DELETING' ) {
+      remove();
+   }
+
+  }, [state.status]);
+
+```
+
+
+### Functions
+
+- Create
+
+
+``` javascript
+async  function create() {
+    try {
+        await axios
+                  .post(
+                      SERVERURL,
+                      {
+                          data: query,
+                          isCompleted: false 
+                      });
+        await setQuery('');
+        await dispatch({type: 'fetch'});
+    } catch(error) {
+        await dispatch({type: 'reject',  error});
+    }
+ }
+
+async  function noEntCreate() {
+    try {
+        await axios
+                  .post(
+                      SERVERURL,
+                      {
+                          data: state.noEntQuery,
+                          isCompleted: state.isCompleted
+                      }
+                  );
+        await dispatch({type: 'fetch'});
+    } catch(error) {
+        await dispatch({type: 'reject',  error});
+    }
+ }
+``` 
+
+- Read
+
+
+``` javascript
+async  function read() {
+       try {
+         const res  = await axios.get(SERVERURL);
+         const data = await res.data.data;
+         await dispatch({type: 'resolve',  data});
+       } catch(error) {
+          await dispatch({type: 'reject',  error});
+       }
+    }
+``` 
+
+- Update
+
+
+
+``` javascript
+async  function update() {
+   try {
+     await axios.put(SERVERURL, {id: state.id});
+     await dispatch({type: 'fetch'});
+   } catch(error) {
+       if(error.message === 'Request failed with status code 409') {
+         let noEntTodo   = await state.data.filter( todo => todo._id === state.id);  
+         let noEntQuery  = await noEntTodo[0].data;
+         let isCompleted = await !noEntTodo[0].isCompleted;
+         await dispatch({type: 'noent', noEntQuery, isCompleted });
+       } else { 
+         await dispatch({type: 'reject',  error});
+       }
+   }
+}
+```
+
+- Remove (Delete)
+
+
+``` javascript
+async  function remove() {
+      try {
+          await axios({
+              method: 'DELETE',
+               url: SERVERURL,  
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json'
+                },
+              data: {
+                  id: state.id
+              }
+             });
+         await dispatch({type: 'fetch'});
+      } catch(error) {
+         await dispatch({type: 'reject',  error});
+      } 
+  }
+
+```
+
+
+
+
+   
+
+
+
+
