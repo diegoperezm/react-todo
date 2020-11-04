@@ -164,15 +164,15 @@ const NEXTSTATE = {
 | DELETING      | remove()      |
 
 
-The actions(create, noEntCreate, read, update and remove) are async functions that are called inside =useEffect= and they also dispatch the events. 
+The actions(create, noEntCreate, read, update and remove) are async functions that are called inside *useEffect* and they also dispatch the events. 
 
-The only dependency in the dependency array is =state.status= and this generate a warning:
+The only dependency in the dependency array is *state.status* and this generate a warning:
 
 
 > React Hook useEffect has missing dependencies: 'query' and 'state.id'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
 
 
-This is because React wants to avoid update inconsistencies. React is watching for 'data' changes (query, state.id) but I want to focus in =state= changes (at the moment I'm ignoring this warning because I can't identify a problem in the app with the current approach).
+This is because React wants to avoid update inconsistencies. React is watching for 'data' changes (query, state.id) but I want to focus in *state* changes (at the moment I'm ignoring this warning because I can't identify a problem in the app with the current approach).
  
 
 ``` javascript
