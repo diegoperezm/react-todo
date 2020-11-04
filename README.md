@@ -7,7 +7,7 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 ## STATE TRANSITION TABLE 
 
 | state         | input   | next state    |
-|-----------------------------------------|
+|---------------|---------|---------------|
 | IDLE          | create  | CREATING      |
 | IDLE          | fetch   | LOADING       |
 | IDLE          | update  | UPDATING      |
@@ -156,7 +156,7 @@ const NEXTSTATE = {
 ## ACTIONS AND DISPATCH
   
 | state         | action        |
-|-------------------------------|
+|---------------|---------------|
 | CREATING      | create()      |
 | NOENTCREATING | noEntCreate() |
 | LOADING       | read()        |
