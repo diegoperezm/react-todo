@@ -5,9 +5,7 @@ import Col                                      from 'react-bootstrap/Col';
 import Button                                   from 'react-bootstrap/Button';
 import Navbar                                   from 'react-bootstrap/Navbar';
 
-import { withFirebase } from '../Firebase';
-
-const SignOutBar = ({ firebase }) => (
+const SignOutBar = (props) => (
   <Row>
      <Col className="mb-5" >
         <Navbar
@@ -15,7 +13,7 @@ const SignOutBar = ({ firebase }) => (
            >
         <Button
           variant="outline-light"
-          onClick={firebase.doSignOut}
+          onClick={() => props.setUser(false) }
         >
         Sign Out
        </Button>
@@ -24,4 +22,4 @@ const SignOutBar = ({ firebase }) => (
   </Row>
   );
 
-export default withFirebase(SignOutBar);
+export default  SignOutBar;

@@ -11,14 +11,21 @@ const List = props => {
         <tr key={'key-'+elem._id}>
           <td>{todoTitle}
            <Button
-            onClick={() => props.dispatch({type: "update",  id })}
+           onClick={() => {
+                           props.setUpdateId(id);
+                           props.dispatch({type: "update"});
+                         }}
              variant="info"
              size="sm"
              className="float-right ml-2">
              Complete
            </Button> 
            <Button
-            onClick={() => props.dispatch({type: "delete",  id })}
+             onClick={() => {
+                 props.setRemoveId(id);
+                 props.dispatch({type: "delete"});
+              }
+             }
              variant="danger"
              size="sm"
              className="float-right">

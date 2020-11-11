@@ -14,13 +14,11 @@ function todoReducer(state, event) {
           update: {
               ...state,
               status:  'UPDATING',
-              id: event.id,
               isInputDisabled: true 
           },
           delete: {
               ...state,
               status:  'DELETING',
-              id: event.id,
               isInputDisabled: true 
           }
       },

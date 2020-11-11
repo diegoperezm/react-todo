@@ -1,5 +1,7 @@
 import   React                                  from 'react';
 import { useState, useEffect, useReducer}       from 'react';
+import { v4 as uuidv4 }                         from 'uuid';
+
 import   todoReducer                            from '../../reducers/todoReducer.js';
 
 import Row                                      from 'react-bootstrap/Row';
@@ -9,11 +11,6 @@ import Table                                    from 'react-bootstrap/Table';
 import Button                                   from 'react-bootstrap/Button';
 
 import List                                     from  '../List/';
-
-import axios                                    from 'axios';
-const  SERVERURL                                = process.env.REACT_APP_SERVER_URL; 
-
-
 
 function Todos() {
   const   initialState        = {
@@ -26,86 +23,47 @@ function Todos() {
                                      isInputDisabled: true 
   };
 
-  const [ state, dispatch ]       = useReducer(todoReducer, initialState);
-  let   [ query, setQuery ]   = useState('');
-
+  const [ state, dispatch ]              = useReducer(todoReducer, initialState);
+  const [ todoData, setTodoData]     = useState([]); 
+  const [ updateId, setUpdateId]     = useState(''); 
+  const [ removeId, setRemoveId]     = useState(''); 
+  const [ query, setQuery ]          = useState('');
+   
   useEffect(() => {
       
-   async  function create() {
-       try {
-           await axios
-                     .post(
-                         SERVERURL, 
-                         {
-                             data: query,
-                             isCompleted: false 
-                         });
-           await setQuery('');
-           await dispatch({type: 'fetch'});
-       } catch(error) {
-           await dispatch({type: 'reject', error});
-       }
-    }
-
-   async  function noEntCreate() {
-       try {
-           await axios
-                     .post(
-                          SERVERURL, 
-                         {
-                             data: state.noEntQuery,
-                             isCompleted: state.isCompleted
-                         }
-                     );
-           await dispatch({type: 'fetch'});
-       } catch(error) {
-           await dispatch({type: 'reject', error});
-       }
-    }
-
-    async  function read() {
-       try {
-         const res  = await axios.get(SERVERURL);
-         const data = await res.data.data;
-         await dispatch({type: 'resolve',  data});
-       } catch(error) {
-          await dispatch({type: 'reject',  error});
-       }
-    }
-
-   async  function update() {
-      try {
-        await axios.put(SERVERURL, {id: state.id});
-        await dispatch({type: 'fetch'});
-      } catch(error) {
-          if(error.message === 'Request failed with status code 409') {
-            let noEntTodo   = await state.data.filter( todo => todo._id === state.id);  
-            let noEntQuery  = await noEntTodo[0].data;
-            let isCompleted = await !noEntTodo[0].isCompleted;
-            await dispatch({type: 'noent', noEntQuery, isCompleted });
-          } else { 
-            await dispatch({type: 'reject',  error});
-          }
-      }
+   function create() {
+    let newTodos =  todoData.concat([{_id: uuidv4() ,data: query, isCompleted: false}]);
+    setTodoData(newTodos);
+    setQuery('');
+    dispatch({type: 'fetch'});
    }
 
-  async  function remove() {
-      try {
-          await axios({
-              method: 'DELETE',
-               url: SERVERURL,  
-                headers: {
-                  Accept: 'application/json',
-                  'Content-Type': 'application/json'
-                },
-              data: {
-                  id: state.id
-              }
-             });
-         await dispatch({type: 'fetch'});
-      } catch(error) {
-         await dispatch({type: 'reject',  error});
-      } 
+// Not implemented
+   function noEntCreate() {
+    dispatch({type: 'failure'});
+   }
+
+    function read() {
+     const data = todoData;  
+     dispatch({type: 'resolve',  data});
+    }
+
+   function update() {
+     let newTodos = todoData.map( todo => {
+       if(todo._id === updateId) {
+         return Object.assign(todo, {isCompleted: !todo.isCompleted});
+       };
+         return todo;
+     });
+     setTodoData(newTodos);
+     dispatch({type: 'fetch'});
+    // error, not implemented: from this error => noEntCreate (IDK if it is possible)  
+   }
+
+  function remove() {
+      let newTodos = todoData.filter(todo => todo._id !== removeId);   
+      setTodoData(newTodos);
+      dispatch({type: 'fetch'});
   }
 
    // CREATE   
@@ -143,7 +101,7 @@ function Todos() {
      return (
    <Row >
       <Col xs={12} className="mt-5">
-          <h1 >To do app, current state: {state.status}</h1>
+          <h1 >To do app</h1>
           <Form
            className="mt-2"
            onSubmit={handleSubmit}
@@ -168,7 +126,12 @@ function Todos() {
      <Col>
         <Table bordered hover className="mt-5" >
           <tbody>
-            <List data={state.data} dispatch={dispatch}/>
+             <List
+                  data={state.data}
+                  dispatch={dispatch}
+                  setUpdateId={setUpdateId}
+                  setRemoveId={setRemoveId}
+             />
           </tbody>
         </Table>
     </Col>
